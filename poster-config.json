@@ -1,0 +1,129 @@
+{
+  "meta": {
+    "configName": "跨境支付与沟通对接指南 - 使用步骤海报",
+    "title": "跨境支付与沟通对接指南",
+    "subtitle": "支持国内 · 海外多场景对接 · 使用步骤",
+    "theme": "business-tech",
+    "orientation": "portrait",
+    "aspectRatio": "9:16",
+    "resolution": "1152x2048",
+    "language": "zh-CN",
+    "source": "稿定AI生成海报的结构化配置"
+  },
+  "style": {
+    "fontFamily": "'Microsoft YaHei UI','Microsoft YaHei','微软雅黑',sans-serif",
+    "colors": {
+      "bgTop": "#123a7a",
+      "bgMid": "#071a3d",
+      "bgBottom": "#03102b",
+      "cardTop": "rgba(30,90,180,0.55)",
+      "cardBottom": "rgba(10,40,100,0.65)",
+      "border": "rgba(90,180,255,0.5)",
+      "accent": "#5fd0ff",
+      "title": "#ffffff",
+      "text": "#cfe2ff",
+      "subtext": "#b9d4ff",
+      "badgeTop": "#2196f3",
+      "badgeBottom": "#0d47a1",
+      "success": "#00d18f"
+    }
+  },
+  "footerTags": [
+    { "icon": "🌐", "text": "国内国外" },
+    { "icon": "🔗", "text": "一键对接" },
+    { "icon": "🛡️", "text": "高效合规" }
+  ],
+  "steps": [
+    {
+      "no": "01",
+      "title": "场景选择",
+      "desc": "根据业务需求，选择合适的对接场景，明确支付与沟通的适用范围。",
+      "columns": [
+        {
+          "label": "国内场景",
+          "icon": "🏙️",
+          "list": false,
+          "items": ["适用于国内业务结算、供应商付款、企业间资金往来等。"]
+        },
+        {
+          "label": "海外场景",
+          "icon": "🌐",
+          "list": false,
+          "items": ["适用于跨境贸易结算、海外采购付款、国际合作项目资金收付等。"]
+        }
+      ]
+    },
+    {
+      "no": "02",
+      "title": "支付对接",
+      "desc": "对合适的支付对象，建立安全、稳定、合规的跨境支付通道。",
+      "columns": [
+        {
+          "label": "国内支付对象",
+          "icon": "🏦",
+          "list": true,
+          "items": [
+            "银行（如国有银行、股份制银行等）",
+            "第三方支付（如支付宝、微信支付、银联商务等）",
+            "企业财务（如企业账户付款、集团资金管理等）"
+          ]
+        },
+        {
+          "label": "海外支付对象",
+          "icon": "💳",
+          "list": true,
+          "items": [
+            "国际支付机构（如 PayPal、Stripe、WorldPay 等）",
+            "本地支付（如当地主流支付平台、海外收单机构等）",
+            "海外合作方（如境外客户、分销商、供应商、合作企业等）"
+          ]
+        }
+      ]
+    },
+    {
+      "no": "03",
+      "title": "沟通对接",
+      "desc": "建立国内与海外的高效沟通机制，确保支付信息、业务需求与进度实时同步。",
+      "centerBadge": "双向沟通机制",
+      "columns": [
+        {
+          "label": "国内沟通对象",
+          "icon": "👨‍💼",
+          "list": true,
+          "items": ["企业项目负责人", "财务与支付专员", "业务对接人员"]
+        },
+        {
+          "label": "海外沟通对象",
+          "icon": "👩‍💼",
+          "list": true,
+          "items": ["海外项目负责人", "当地合作机构代表", "海外项目协调人员"]
+        }
+      ]
+    },
+    {
+      "no": "04",
+      "title": "完成验证",
+      "desc": "进行支付结果与业务流程的验证，确保数据一致、合规可追溯并形成闭环。",
+      "columns": [
+        {
+          "label": "对账确认",
+          "icon": "✅",
+          "list": false,
+          "items": ["核对支付金额、币种、收付款信息与订单/合同一致。"]
+        },
+        {
+          "label": "合规校验",
+          "icon": "✅",
+          "list": false,
+          "items": ["检查支付流程、资金来源与业务背景，符合国内外相关法规与合规要求。"]
+        },
+        {
+          "label": "流程闭环",
+          "icon": "✅",
+          "list": false,
+          "items": ["确认支付完成、沟通对接落地，归档凭证与记录，形成可追溯的业务闭环。"]
+        }
+      ]
+    }
+  ]
+}
