@@ -1,0 +1,220 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>跨境支付与沟通对接指南 · 使用步骤海报</title>
+<style>
+  :root{
+    --font:'Microsoft YaHei UI','Microsoft YaHei','微软雅黑',sans-serif;
+    --bgTop:#123a7a; --bgMid:#071a3d; --bgBottom:#03102b;
+    --cardTop:rgba(30,90,180,0.55); --cardBottom:rgba(10,40,100,0.65);
+    --border:rgba(90,180,255,0.5); --accent:#5fd0ff;
+    --title:#ffffff; --text:#cfe2ff; --subtext:#b9d4ff;
+    --badgeTop:#2196f3; --badgeBottom:#0d47a1; --success:#00d18f;
+  }
+  *{box-sizing:border-box;margin:0;padding:0}
+  body{
+    font-family:var(--font);
+    background:#0a0f1f;
+    display:flex;justify-content:center;
+    padding:32px 16px 60px;
+    -webkit-font-smoothing:antialiased;
+  }
+  .poster{
+    width:100%;max-width:600px;
+    position:relative;overflow:hidden;
+    background:
+      radial-gradient(circle at 18% 8%,rgba(60,140,255,.35),transparent 30%),
+      radial-gradient(circle at 82% 22%,rgba(40,110,220,.28),transparent 28%),
+      radial-gradient(circle at 50% 105%,rgba(30,120,230,.45),transparent 42%),
+      linear-gradient(180deg,var(--bgTop) 0%,var(--bgMid) 48%,var(--bgBottom) 100%);
+    border:1px solid rgba(90,180,255,.35);
+    border-radius:18px;
+    box-shadow:0 0 60px rgba(20,90,200,.35),inset 0 0 60px rgba(10,40,100,.5);
+    padding:30px 24px 34px;
+  }
+  .poster::before{
+    content:"";position:absolute;inset:0;pointer-events:none;opacity:.16;
+    background-image:linear-gradient(rgba(120,190,255,.25) 1px,transparent 1px),linear-gradient(90deg,rgba(120,190,255,.25) 1px,transparent 1px);
+    background-size:34px 34px;
+    mask-image:linear-gradient(180deg,#000,transparent 60%);
+  }
+  .star{position:absolute;width:3px;height:3px;border-radius:50%;background:#bfe4ff;box-shadow:0 0 8px 2px rgba(150,210,255,.8)}
+  header{position:relative;text-align:center;margin-bottom:18px}
+  h1{
+    color:var(--title);font-size:40px;font-weight:900;letter-spacing:2px;line-height:1.2;
+    text-shadow:0 0 18px rgba(120,200,255,.75),0 3px 0 rgba(8,30,80,.9);
+  }
+  .subtitle{
+    display:inline-block;margin-top:14px;position:relative;
+    font-size:17px;font-weight:700;letter-spacing:3px;color:#eaf4ff;
+    padding:8px 22px;
+    background:linear-gradient(90deg,rgba(20,80,170,0),rgba(30,110,220,.85) 18%,rgba(30,110,220,.85) 82%,rgba(20,80,170,0));
+    clip-path:polygon(8% 0,92% 0,100% 50%,92% 100%,8% 100%,0 50%);
+  }
+  .subtitle::before,.subtitle::after{content:"▰";position:absolute;top:50%;transform:translateY(-50%);color:var(--accent);font-size:14px}
+  .subtitle::before{left:-2px}.subtitle::after{right:-2px}
+  .flow{display:flex;justify-content:center;margin:6px 0}
+  .flow span{color:var(--accent);font-size:26px;line-height:1;text-shadow:0 0 12px var(--accent)}
+  .step{
+    position:relative;
+    background:linear-gradient(135deg,var(--cardTop),var(--cardBottom));
+    border:1px solid var(--border);
+    border-radius:16px;
+    box-shadow:0 6px 26px rgba(10,60,150,.35),inset 0 1px 0 rgba(180,220,255,.25);
+    padding:16px 16px 18px;
+    margin-bottom:6px;
+  }
+  .step-head{display:flex;align-items:center;gap:12px}
+  .no{
+    flex:none;width:46px;height:46px;border-radius:50%;
+    display:flex;align-items:center;justify-content:center;
+    font-size:23px;font-weight:900;color:#fff;font-style:italic;
+    background:linear-gradient(145deg,var(--badgeTop),var(--badgeBottom));
+    border:1px solid rgba(180,220,255,.7);
+    box-shadow:0 0 16px rgba(70,160,255,.6),inset 0 2px 4px rgba(255,255,255,.35);
+  }
+  .step-title{color:var(--title);font-size:25px;font-weight:900;letter-spacing:1px;text-shadow:0 0 10px rgba(110,190,255,.5)}
+  .step-desc{color:var(--subtext);font-size:13px;line-height:1.5;margin:9px 0 13px;padding-left:2px}
+  .cols{display:grid;gap:10px}
+  .cols.two{grid-template-columns:1fr 1fr}
+  .cols.three{grid-template-columns:repeat(3,1fr)}
+  .col{
+    background:rgba(4,22,58,.72);
+    border:1px solid rgba(90,170,255,.35);
+    border-radius:12px;padding:12px 12px 13px;
+    box-shadow:inset 0 0 18px rgba(20,70,150,.35);
+  }
+  .col-head{display:flex;align-items:center;gap:8px;margin-bottom:8px}
+  .col-icon{
+    flex:none;width:32px;height:32px;border-radius:9px;
+    display:flex;align-items:center;justify-content:center;font-size:18px;
+    background:linear-gradient(145deg,rgba(60,140,235,.55),rgba(15,60,140,.55));
+    border:1px solid rgba(140,200,255,.45);
+  }
+  .col-label{color:#eaf4ff;font-size:15px;font-weight:800;letter-spacing:.5px}
+  .col-items{list-style:none;padding-left:1px}
+  .col-items li{
+    position:relative;color:var(--text);font-size:12.5px;line-height:1.6;
+    padding-left:13px;margin-bottom:5px;
+  }
+  .col-items li::before{
+    content:"";position:absolute;left:1px;top:8px;width:5px;height:5px;border-radius:50%;
+    background:var(--accent);box-shadow:0 0 6px var(--accent);
+  }
+  .col-para{color:var(--text);font-size:12.5px;line-height:1.7}
+  .center-badge{
+    display:table;margin:11px auto 0;padding:5px 18px;
+    color:#eaf6ff;font-size:13px;font-weight:800;letter-spacing:2px;
+    background:linear-gradient(90deg,rgba(20,80,170,.2),rgba(30,120,230,.55),rgba(20,80,170,.2));
+    border:1px solid rgba(110,190,255,.55);border-radius:20px;
+  }
+  .footer{display:flex;justify-content:center;gap:14px;flex-wrap:wrap;margin-top:24px;position:relative}
+  .tag{
+    display:flex;align-items:center;gap:7px;
+    padding:9px 18px;border-radius:22px;
+    color:#eaf6ff;font-size:15px;font-weight:800;letter-spacing:1px;
+    background:linear-gradient(180deg,rgba(30,110,220,.5),rgba(10,50,120,.6));
+    border:1px solid rgba(120,200,255,.6);
+    box-shadow:0 0 16px rgba(50,140,240,.35),inset 0 1px 0 rgba(200,230,255,.35);
+  }
+  .tag .ic{font-size:16px}
+  .earth{
+    position:absolute;left:-10%;right:-10%;bottom:-70px;height:190px;
+    border-radius:50% 50% 0 0;
+    background:radial-gradient(ellipse at 50% 0%,rgba(80,170,255,.35),rgba(10,50,120,.15) 55%,transparent 72%);
+    border-top:1px solid rgba(120,200,255,.25);
+    pointer-events:none;
+  }
+</style>
+</head>
+<body>
+<div class="poster" id="poster">
+  <div class="earth"></div>
+  <header>
+    <h1 id="title"></h1>
+    <div class="subtitle" id="subtitle"></div>
+  </header>
+  <main id="steps"></main>
+  <div class="footer" id="footer"></div>
+</div>
+
+<script type="application/json" id="inline-config">
+{
+  "meta": {
+    "title": "跨境支付与沟通对接指南",
+    "subtitle": "支持国内 · 海外多场景对接 · 使用步骤"
+  },
+  "style": {},
+  "footerTags": [
+    { "icon": "🌐", "text": "国内国外" },
+    { "icon": "🔗", "text": "一键对接" },
+    { "icon": "🛡️", "text": "高效合规" }
+  ],
+  "steps": [
+    {"no":"01","title":"场景选择","desc":"根据业务需求，选择合适的对接场景，明确支付与沟通的适用范围。","columns":[
+      {"label":"国内场景","icon":"🏙️","list":false,"items":["适用于国内业务结算、供应商付款、企业间资金往来等。"]},
+      {"label":"海外场景","icon":"🌐","list":false,"items":["适用于跨境贸易结算、海外采购付款、国际合作项目资金收付等。"]}]},
+    {"no":"02","title":"支付对接","desc":"对合适的支付对象，建立安全、稳定、合规的跨境支付通道。","columns":[
+      {"label":"国内支付对象","icon":"🏦","list":true,"items":["银行（如国有银行、股份制银行等）","第三方支付（如支付宝、微信支付、银联商务等）","企业财务（如企业账户付款、集团资金管理等）"]},
+      {"label":"海外支付对象","icon":"💳","list":true,"items":["国际支付机构（如 PayPal、Stripe、WorldPay 等）","本地支付（如当地主流支付平台、海外收单机构等）","海外合作方（如境外客户、分销商、供应商、合作企业等）"]}]},
+    {"no":"03","title":"沟通对接","desc":"建立国内与海外的高效沟通机制，确保支付信息、业务需求与进度实时同步。","centerBadge":"双向沟通机制","columns":[
+      {"label":"国内沟通对象","icon":"👨‍💼","list":true,"items":["企业项目负责人","财务与支付专员","业务对接人员"]},
+      {"label":"海外沟通对象","icon":"👩‍💼","list":true,"items":["海外项目负责人","当地合作机构代表","海外项目协调人员"]}]},
+    {"no":"04","title":"完成验证","desc":"进行支付结果与业务流程的验证，确保数据一致、合规可追溯并形成闭环。","columns":[
+      {"label":"对账确认","icon":"✅","list":false,"items":["核对支付金额、币种、收付款信息与订单/合同一致。"]},
+      {"label":"合规校验","icon":"✅","list":false,"items":["检查支付流程、资金来源与业务背景，符合国内外相关法规与合规要求。"]},
+      {"label":"流程闭环","icon":"✅","list":false,"items":["确认支付完成、沟通对接落地，归档凭证与记录，形成可追溯的业务闭环。"]}]}
+  ]
+}
+</script>
+
+<script>
+function applyConfig(cfg){
+  var m=cfg.meta||{};
+  document.getElementById('title').textContent=m.title||'';
+  document.getElementById('subtitle').textContent=m.subtitle||'';
+
+  var root=document.documentElement;
+  var c=(cfg.style&&cfg.style.colors)||{};
+  var map={bgTop:'--bgTop',bgMid:'--bgMid',bgBottom:'--bgBottom',cardTop:'--cardTop',cardBottom:'--cardBottom',border:'--border',accent:'--accent',title:'--title',text:'--text',subtext:'--subtext',badgeTop:'--badgeTop',badgeBottom:'--badgeBottom',success:'--success'};
+  Object.keys(map).forEach(function(k){ if(c[k]) root.style.setProperty(map[k],c[k]); });
+  if(cfg.style&&cfg.style.fontFamily) root.style.setProperty('--font',cfg.style.fontFamily);
+
+  var stepsEl=document.getElementById('steps');
+  var html='';
+  (cfg.steps||[]).forEach(function(s,i){
+    if(i>0) html+='<div class="flow"><span>⬇</span></div>';
+    var colsClass=(s.columns&&s.columns.length)===3?'three':'two';
+    var colsHtml=(s.columns||[]).map(function(col){
+      var body=col.list
+        ? '<ul class="col-items">'+col.items.map(function(it){return '<li>'+it+'</li>';}).join('')+'</ul>'
+        : '<p class="col-para">'+(col.items&&col.items[0]||'')+'</p>';
+      return '<div class="col"><div class="col-head"><span class="col-icon">'+col.icon+'</span><span class="col-label">'+col.label+'</span></div>'+body+'</div>';
+    }).join('');
+    var badge=s.centerBadge?'<div class="center-badge">'+s.centerBadge+'</div>':'';
+    html+='<section class="step"><div class="step-head"><span class="no">'+s.no+'</span><span class="step-title">'+s.title+'</span></div>'
+        +'<p class="step-desc">'+s.desc+'</p><div class="cols '+colsClass+'">'+colsHtml+'</div>'+badge+'</section>';
+  });
+  stepsEl.innerHTML=html;
+
+  document.getElementById('footer').innerHTML=(cfg.footerTags||[]).map(function(t){
+    return '<span class="tag"><span class="ic">'+t.icon+'</span>'+t.text+'</span>';
+  }).join('');
+}
+
+(async function(){
+  var cfg;
+  try{
+    var r=await fetch('./poster-config.json',{cache:'no-store'});
+    if(!r.ok) throw new Error('fetch failed');
+    cfg=await r.json();
+  }catch(e){
+    cfg=JSON.parse(document.getElementById('inline-config').textContent);
+  }
+  applyConfig(cfg);
+})();
+</script>
+</body>
+</html>
