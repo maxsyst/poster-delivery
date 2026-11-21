@@ -1,0 +1,59 @@
+/*
+ * Android 原生桥接示例（可选增强）
+ *
+ * 说明：默认 mobile-bridge.js 已用 localStorage 实现本地持久化，Capacitor WebView 内
+ * 天然持久化在 App 沙箱，无需原生代码即可满足「保存到本地」。
+ * 本示例演示 Capacitor 7 中如何用 @JavascriptInterface 暴露原生文件存储桥接，
+ * 供需要写入 App 外部存储 / 原生 Preferences 的场景扩展。
+ *
+ * 使用：将本文件复制到 android/app/src/main/java/com/maxsyst/posterdelivery/BridgeActivity.java，
+ * 并在 MainActivity.onCreate 中 addJavascriptInterface(new JsBridge(), "NativeStore")；
+ * 然后在 mobile-bridge.js 的 save/load 中优先调用 window.NativeStore.*。
+ */
+package com.maxsyst.posterdelivery;
+
+import android.content.Context;
+import android.webkit.JavascriptInterface;
+import org.json.JSONObject;
+import java.io.File;
+import java.io.FileOutputStream;
+import java.nio.charset.StandardCharsets;
+
+public class BridgeActivity {
+    private final Context ctx;
+    public BridgeActivity(Context c) { this.ctx = c; }
+
+    private File dir() {
+        File d = new File(ctx.getFilesDir(), "poster-delivery");
+        if (!d.exists()) d.mkdirs();
+        return d;
+    }
+    private String safe(String id) { return id.replaceAll("[^\\w\\-]", "_"); }
+
+    /** 保存配置到 App 内部存储（持久化，卸载才清除） */
+    @JavascriptInterface
+    public String save(String id, String json) {
+        try {
+            File f = new File(dir(), safe(id) + ".json");
+            FileOutputStream fos = new FileOutputStream(f);
+            fos.write(json.getBytes(StandardCharsets.UTF_8));
+            fos.close();
+            return "{\"ok\":true}";
+        } catch (Exception e) { return "{\"ok\":false,\"error\":\"" + e.getMessage() + "\"}"; }
+    }
+
+    /** 读取配置 */
+    @JavascriptInterface
+    public String load(String id) {
+        try {
+            File f = new File(dir(), safe(id) + ".json");
+            if (!f.exists()) return "null";
+            byte[] b = new java.io.FileInputStream(f).readAllBytes();
+            return new String(b, StandardCharsets.UTF_8);
+        } catch (Exception e) { return "null"; }
+    }
+
+    /** 数据目录（供 UI 显示） */
+    @JavascriptInterface
+    public String dataDir() { return dir().getAbsolutePath(); }
+}
