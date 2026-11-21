@@ -1,0 +1,16 @@
+{
+  "appId": "com.maxsyst.posterdelivery",
+  "appName": "跨境对接配置中心",
+  "webDir": "www",
+  "bundledWebRuntime": false,
+  "loggingBehavior": "debug",
+  "android": {
+    "allowMixedContent": true,
+    "captureInput": false
+  },
+  "plugins": {
+    "Preferences": {
+      "group": "posterDelivery"
+    }
+  }
+}
