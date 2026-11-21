@@ -1,0 +1,18 @@
+{
+  "name": "poster-delivery-mobile",
+  "version": "1.0.0",
+  "private": true,
+  "description": "跨境对接配置中心 - 手机 APK 对接工程（Capacitor）",
+  "scripts": {
+    "sync": "node sync.js",
+    "add:android": "cap add android",
+    "build:apk": "cap sync android && cd android && gradlew assembleDebug",
+    "open:android": "cap open android"
+  },
+  "dependencies": {
+    "@capacitor/core": "^7.0.0",
+    "@capacitor/cli": "^7.0.0",
+    "@capacitor/android": "^7.0.0",
+    "@capacitor/preferences": "^7.0.0"
+  }
+}
