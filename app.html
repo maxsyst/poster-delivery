@@ -1,0 +1,534 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>跨端配置中心 · 持久化 + 消息队列</title>
+<style>
+  :root{
+    --font:'Microsoft YaHei UI','Microsoft YaHei','微软雅黑',sans-serif;
+    --bg:#0a1020; --panel:#0f1b36; --panel2:#12244a;
+    --border:rgba(95,208,255,.35); --accent:#5fd0ff; --accent2:#4a8cff;
+    --title:#fff; --text:#d5e6ff; --sub:#9dbbe6; --warn:#ffb454;
+  }
+  *{box-sizing:border-box;margin:0;padding:0}
+  body{font-family:var(--font);background:var(--bg);color:var(--text);line-height:1.6;-webkit-font-smoothing:antialiased}
+  .wrap{max-width:1000px;margin:0 auto;padding:28px 20px 70px}
+  header{text-align:center;padding:12px 0 22px}
+  header h1{font-size:29px;font-weight:900;color:var(--title);letter-spacing:1px;text-shadow:0 0 20px rgba(95,208,255,.45)}
+  header p{color:var(--sub);font-size:13px;margin-top:8px}
+  .tip{font-size:12px;color:var(--warn);margin-top:8px}
+
+  .linkbar{display:flex;flex-wrap:wrap;gap:8px;justify-content:center;margin:10px 0 26px}
+  .linkbar a{text-decoration:none;color:#eaf4ff;font-size:12px;font-weight:700;padding:7px 13px;border-radius:18px;
+    background:rgba(30,110,220,.4);border:1px solid var(--border)}
+  .linkbar a:hover{background:rgba(40,120,230,.6);border-color:#fff}
+
+  .panel{background:linear-gradient(135deg,var(--panel2),var(--panel));border:1px solid var(--border);border-radius:14px;
+    padding:18px 20px;margin-bottom:18px;box-shadow:0 6px 22px rgba(8,40,100,.3)}
+  .panel h2{font-size:17px;color:var(--accent);margin-bottom:4px;letter-spacing:.5px}
+  .panel .hint{font-size:12px;color:var(--sub);margin-bottom:14px}
+
+  table.form{width:100%;border-collapse:collapse;font-size:13px}
+  table.form th,table.form td{border:1px solid rgba(95,208,255,.22);padding:8px 10px;text-align:left;vertical-align:top}
+  table.form th{background:rgba(20,70,150,.4);color:#eaf4ff;font-weight:700;width:190px;white-space:nowrap}
+  table.form td input,table.form td textarea,table.form td select{
+    width:100%;background:rgba(4,22,58,.75);border:1px solid rgba(95,208,255,.3);border-radius:6px;
+    color:var(--text);padding:6px 9px;font-family:var(--font);font-size:13px;outline:none}
+  table.form td textarea{resize:vertical;min-height:52px}
+  table.form td input:focus,table.form td textarea:focus,table.form td select:focus{border-color:var(--accent)}
+
+  .step-block{border:1px solid rgba(95,208,255,.25);border-radius:10px;margin-bottom:14px;overflow:hidden}
+  .step-block h3{font-size:14px;color:var(--accent);padding:9px 12px;background:rgba(20,70,150,.35)}
+  .step-block .body{padding:10px 12px}
+  .sub-table{width:100%;border-collapse:collapse;margin-top:8px;font-size:12.5px}
+  .sub-table th,.sub-table td{border:1px solid rgba(95,208,255,.2);padding:6px 8px;text-align:left}
+  .sub-table th{background:rgba(20,70,150,.3);color:#cfe4ff;font-weight:700}
+  .sub-table td input,.sub-table td textarea,.sub-table td select{
+    width:100%;background:rgba(4,22,58,.7);border:1px solid rgba(95,208,255,.25);border-radius:5px;
+    color:var(--text);padding:5px 7px;font-family:var(--font);font-size:12.5px}
+  .sub-table td textarea{min-height:44px;resize:vertical}
+  .btn-sm{background:rgba(40,120,230,.5);border:1px solid var(--border);color:#eaf6ff;border-radius:6px;
+    padding:4px 10px;font-size:12px;cursor:pointer;font-family:var(--font)}
+  .btn-sm:hover{background:rgba(60,150,255,.7)}
+  .btn-add{margin-top:8px}
+  .btn-del{background:rgba(180,60,60,.45);border-color:rgba(255,150,150,.4)}
+  .btn-del:hover{background:rgba(220,70,70,.7)}
+
+  .actions{display:flex;flex-wrap:wrap;gap:10px;justify-content:center;margin:24px 0 18px}
+  .actions button{font-family:var(--font);font-weight:800;font-size:14px;color:#fff;cursor:pointer;
+    padding:11px 20px;border-radius:24px;border:1px solid var(--border);
+    background:linear-gradient(180deg,rgba(40,120,230,.7),rgba(12,50,120,.8));box-shadow:0 0 16px rgba(50,140,240,.35)}
+  .actions button:hover{box-shadow:0 0 26px rgba(95,208,255,.7);border-color:#fff}
+  .actions button.primary{background:linear-gradient(180deg,#2b8cff,#0d47a1)}
+
+  .preview{background:#06122c;border:1px solid var(--border);border-radius:12px;overflow:hidden}
+  .tabs{display:flex;gap:0;border-bottom:1px solid var(--border)}
+  .tabs button{flex:1;background:rgba(20,60,130,.3);border:0;border-right:1px solid var(--border);
+    color:var(--sub);padding:10px;font-family:var(--font);font-size:13px;font-weight:700;cursor:pointer}
+  .tabs button.active{background:rgba(40,120,230,.55);color:#fff}
+  pre#out{max-height:420px;overflow:auto;padding:14px;font-size:12px;color:#bfe0ff;white-space:pre-wrap;word-break:break-all}
+  .status{text-align:center;font-size:12px;color:var(--accent);margin-top:10px;min-height:18px}
+  @media(max-width:720px){.wrap{padding:18px 12px 50px}header h1{font-size:22px}table.form th{width:130px}}
+
+  /* === 持久化配置库 + 消息队列 === */
+  .envbar{display:flex;align-items:center;gap:10px;flex-wrap:wrap;background:rgba(6,22,58,.7);
+    border:1px solid var(--border);border-radius:10px;padding:10px 14px;margin-bottom:14px;font-size:12.5px}
+  .envbar .badge{background:linear-gradient(180deg,#2b8cff,#0d47a1);color:#fff;font-weight:800;
+    padding:4px 12px;border-radius:16px;border:1px solid rgba(180,220,255,.6)}
+  .envbar .cap{color:var(--sub)}
+  .store-row{display:flex;gap:8px;flex-wrap:wrap;margin-bottom:12px}
+  .store-row input{flex:1;min-width:180px;background:rgba(4,22,58,.75);border:1px solid rgba(95,208,255,.3);
+    border-radius:6px;color:var(--text);padding:7px 10px;font-family:var(--font);font-size:13px}
+  .cfg-list{list-style:none}
+  .cfg-list li{display:flex;align-items:center;gap:10px;background:rgba(6,22,58,.6);border:1px solid rgba(95,208,255,.2);
+    border-radius:8px;padding:8px 12px;margin-bottom:6px;font-size:12.5px}
+  .cfg-list .nm{flex:1;font-weight:700;color:#eaf4ff}
+  .cfg-list .meta{color:var(--sub);font-size:11px}
+  .cfg-list button{font-family:var(--font);font-size:11px;cursor:pointer;padding:4px 9px;border-radius:6px;
+    border:1px solid var(--border);background:rgba(40,120,230,.5);color:#eaf6ff}
+  .cfg-list button.danger{background:rgba(180,60,60,.45)}
+  .mq-log{margin-top:12px;background:#06122c;border:1px solid var(--border);border-radius:8px;padding:10px 12px;
+    font-size:11.5px;color:#9fe0c8;max-height:120px;overflow:auto;white-space:pre-wrap}
+  .mq-log .t{color:var(--sub)}
+</style>
+  <script src="bridge.js"></script>
+</head>
+<body>
+<div class="wrap">
+  <header>
+    <h1>内容数据填写表格 · JSON 生成器</h1>
+    <p>按表格填入你的实际内容，点击下方「生成 JSON」，即可导出两份配置文件（内置生成，无需外部工具）</p>
+    <div class="tip">当前已预填通用示例值，直接在输入框里改成你的真实内容即可；留空项将保留通用值。</div>
+  </header>
+
+
+  <section class="panel" id="storePanel">
+    <h2>💾 配置库 · 持久化与消息队列通道</h2>
+    <div class="hint">同一套表单，三端共用：由 bridge.js 决定数据存在哪里。填入名称保存配置，或发布到消息队列。</div>
+    <div class="envbar" id="envbar"><span class="badge" id="env-badge">检测中…</span><span class="cap" id="env-cap"></span></div>
+    <div class="store-row">
+      <input id="cfg-name" placeholder="配置名称，例如：Acme 跨境对接">
+      <button class="btn-sm" onclick="storeSave()">💾 保存到配置库</button>
+      <button class="btn-sm" onclick="storePublish()">📤 发布到消息队列</button>
+    </div>
+    <ul class="cfg-list" id="cfg-list"></ul>
+    <div class="mq-log" id="mq-log"><span class="t">消息队列日志（订阅 topic: poster-config）…</span></div>
+  </section>
+
+  <nav class="linkbar">
+    <a href="ARCHITECTURE.md">🏗️ 跨端架构说明</a>
+    <a href="poster.html">🖼️ 海报展示</a>
+    <a href="dependencies.html">🧭 依赖导航</a>
+    <a href="step-dependencies.xmind">🧠 思维导图</a>
+    <a href="poster-config.json">⚙️ 海报 JSON</a>
+    <a href="dependencies-config.json">🧩 依赖 JSON</a>
+    <a href="https://maxsyst.github.io/poster-delivery/" target="_blank">🌐 线上站点</a>
+  </nav>
+
+  <!-- ① 主体信息 -->
+  <section class="panel">
+    <h2>① 主体信息</h2>
+    <div class="hint">用于海报主标题、副标题与来源标注</div>
+    <table class="form">
+      <tr><th>品牌 / 产品 / 服务名<br>（主标题）</th><td><input id="m-title" value="跨境支付与沟通对接指南"></td></tr>
+      <tr><th>副标题 / 宣传语</th><td><input id="m-subtitle" value="支持国内 · 海外多场景对接 · 使用步骤"></td></tr>
+      <tr><th>数据来源说明<br>（可选）</th><td><input id="m-source" value="依赖关系基于已确认的四步使用步骤流程逻辑梳理，非新增产品参数或事实"></td></tr>
+    </table>
+  </section>
+
+  <!-- ② 海报四步内容 -->
+  <section class="panel">
+    <h2>② 海报四步内容</h2>
+    <div class="hint">每步的标题、说明，以及各分栏对象（多行用换行分隔）。可增删分栏。</div>
+    <div id="posterSteps"></div>
+    <button class="btn-sm btn-add" onclick="addPosterStep()">+ 增加一个步骤</button>
+  </section>
+
+  <!-- ③ 步骤依赖项 -->
+  <section class="panel">
+    <h2>③ 步骤依赖项</h2>
+    <div class="hint">依赖类型：前置依赖 / 依赖对象 / 支撑条件 / 输出依赖。来源步骤填编号（如 01），输出给填编号用逗号分隔。</div>
+    <div id="depSteps"></div>
+  </section>
+
+  <!-- ④ 跨步骤依赖链 -->
+  <section class="panel">
+    <h2>④ 跨步骤依赖链</h2>
+    <div class="hint">描述步骤之间的先后与产出关系，可增删行。</div>
+    <table class="sub-table" id="crossTable">
+      <thead><tr><th style="width:70px">来自步骤</th><th style="width:70px">到步骤</th><th>关系说明</th><th style="width:60px">操作</th></tr></thead>
+      <tbody id="crossBody"></tbody>
+    </table>
+    <button class="btn-sm btn-add" onclick="addCross()">+ 增加一条依赖</button>
+  </section>
+
+  <div class="actions">
+    <button class="primary" onclick="generate()">⚙️ 生成 JSON</button>
+    <button onclick="copyJson()">📋 复制当前 JSON</button>
+    <button onclick="downloadJson('poster')">⬇️ 下载海报 JSON</button>
+    <button onclick="downloadJson('deps')">⬇️ 下载依赖 JSON</button>
+    <button onclick="resetForm()">↺ 恢复默认</button>
+  </div>
+
+  <section class="preview">
+    <div class="tabs">
+      <button id="tab-poster" class="active" onclick="switchTab('poster')">poster-config.json</button>
+      <button id="tab-deps" onclick="switchTab('deps')">dependencies-config.json</button>
+    </div>
+    <pre id="out">点击「生成 JSON」后在这里预览结果…</pre>
+  </section>
+  <div class="status" id="status"></div>
+</div>
+
+<script>
+/* ===== 默认数据（与现有配置一致的通用示例值） ===== */
+var DEF_POSTER_STEPS=[
+  {no:"01",title:"场景选择",desc:"根据业务需求，选择合适的对接场景，明确支付与沟通的适用范围。",columns:[
+    {label:"国内场景",icon:"🏙️",list:false,items:["适用于国内业务结算、供应商付款、企业间资金往来等。"]},
+    {label:"海外场景",icon:"🌐",list:false,items:["适用于跨境贸易结算、海外采购付款、国际合作项目资金收付等。"]}]},
+  {no:"02",title:"支付对接",desc:"对合适的支付对象，建立安全、稳定、合规的跨境支付通道。",columns:[
+    {label:"国内支付对象",icon:"🏦",list:true,items:["银行（如国有银行、股份制银行等）","第三方支付（如支付宝、微信支付、银联商务等）","企业财务（如企业账户付款、集团资金管理等）"]},
+    {label:"海外支付对象",icon:"💳",list:true,items:["国际支付机构（如 PayPal、Stripe、WorldPay 等）","本地支付（如当地主流支付平台、海外收单机构等）","海外合作方（如境外客户、分销商、供应商、合作企业等）"]}]},
+  {no:"03",title:"沟通对接",desc:"建立国内与海外的高效沟通机制，确保支付信息、业务需求与进度实时同步。",columns:[
+    {label:"国内沟通对象",icon:"👨‍💼",list:true,items:["企业项目负责人","财务与支付专员","业务对接人员"]},
+    {label:"海外沟通对象",icon:"👩‍💼",list:true,items:["海外项目负责人","当地合作机构代表","海外项目协调人员"]}]},
+  {no:"04",title:"完成验证",desc:"进行支付结果与业务流程的验证，确保数据一致、合规可追溯并形成闭环。",columns:[
+    {label:"对账确认",icon:"✅",list:false,items:["核对支付金额、币种、收付款信息与订单/合同一致。"]},
+    {label:"合规校验",icon:"✅",list:false,items:["检查支付流程、资金来源与业务背景，符合国内外相关法规与合规要求。"]},
+    {label:"流程闭环",icon:"✅",list:false,items:["确认支付完成、沟通对接落地，归档凭证与记录，形成可追溯的业务闭环。"]}]}
+];
+var DEF_DEPS=[
+  {type:"前置依赖",name:"业务需求确认",detail:"明确业务类型与结算方向",from:null,to:[]},
+  {type:"支撑条件",name:"场景判定依据",detail:"交易发生地、收付款方所在地、币种",from:null,to:[]},
+  {type:"依赖对象",name:"国内场景 / 海外场景",detail:"二选一，决定后续支付与沟通对象范围",from:null,to:[]},
+  {type:"输出依赖",name:"场景类型",detail:"输出给步骤02、03，决定国内或海外对象清单",from:null,to:["02","03"]}
+];
+var DEF_DEPS2=[
+  {type:"前置依赖",name:"步骤01 场景类型",detail:"场景决定选用国内或海外支付对象清单",from:"01",to:[]},
+  {type:"依赖对象",name:"国内支付对象",detail:"银行 / 第三方支付 / 企业财务",from:null,to:[]},
+  {type:"依赖对象",name:"海外支付对象",detail:"国际支付机构 / 本地支付 / 海外合作方",from:null,to:[]},
+  {type:"支撑条件",name:"账户资质与支付通道",detail:"账户可用、通道合规、币种支持",from:null,to:[]},
+  {type:"输出依赖",name:"支付结果与凭证",detail:"作为步骤04对账确认的依据",from:null,to:["04"]}
+];
+var DEF_DEPS3=[
+  {type:"前置依赖",name:"步骤01 场景类型",detail:"场景决定选用国内或海外沟通对象",from:"01",to:[]},
+  {type:"前置依赖",name:"步骤02 对接进度",detail:"支付对象确定后同步对应沟通人",from:"02",to:[]},
+  {type:"依赖对象",name:"国内沟通对象",detail:"项目负责人 / 财务与支付专员 / 业务对接人员",from:null,to:[]},
+  {type:"依赖对象",name:"海外沟通对象",detail:"项目负责人 / 当地合作机构代表 / 项目协调人员",from:null,to:[]},
+  {type:"支撑条件",name:"双向沟通机制",detail:"支付信息、业务需求、进度实时同步",from:null,to:[]},
+  {type:"输出依赖",name:"沟通记录与确认",detail:"作为步骤04流程闭环的依据",from:null,to:["04"]}
+];
+var DEF_DEPS4=[
+  {type:"前置依赖",name:"步骤02 支付结果",detail:"对账确认的金额、币种、收付款依据",from:"02",to:[]},
+  {type:"前置依赖",name:"步骤03 沟通记录",detail:"确认沟通落地，支撑流程闭环",from:"03",to:[]},
+  {type:"依赖对象",name:"订单 / 合同",detail:"核对支付金额、币种、收付款信息一致性",from:null,to:[]},
+  {type:"支撑条件",name:"国内外法规与合规要求",detail:"检查支付流程、资金来源与业务背景",from:null,to:[]},
+  {type:"输出依赖",name:"可追溯业务闭环",detail:"归档凭证与记录，形成完整闭环",from:null,to:[]}
+];
+var DEF_DEPS_BY_STEP=[DEF_DEPS,DEF_DEPS2,DEF_DEPS3,DEF_DEPS4];
+var DEF_CROSS=[
+  {from:"01",to:"02",label:"场景决定支付对象"},
+  {from:"01",to:"03",label:"场景决定沟通对象"},
+  {from:"02",to:"03",label:"支付对象确定对应沟通人"},
+  {from:"02",to:"04",label:"支付结果用于对账"},
+  {from:"03",to:"04",label:"沟通记录用于闭环"}
+];
+var TYPE_OPTS=["前置依赖","依赖对象","支撑条件","输出依赖"];
+
+/* ===== 渲染表单 ===== */
+function esc(s){return String(s==null?'':s).replace(/[&<>"]/g,function(c){return {'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;'}[c];});}
+function renderPosterSteps(steps){
+  document.getElementById('posterSteps').innerHTML=steps.map(function(s,i){
+    var cols=(s.columns||[]).map(function(c,j){
+      return '<tr><td><input class="ps-label" value="'+esc(c.label)+'"></td>'
+        +'<td style="width:60px"><input class="ps-icon" value="'+esc(c.icon)+'"></td>'
+        +'<td><textarea class="ps-items" rows="3">'+esc((c.items||[]).join('\n'))+'</textarea></td>'
+        +'<td style="width:50px"><button class="btn-sm btn-del" onclick="delCol('+i+','+j+')">删</button></td></tr>';
+    }).join('');
+    return '<div class="step-block" data-si="'+i+'"><h3>步骤 '+esc(s.no)+' · '+esc(s.title)
+      +' <button class="btn-sm btn-del" style="float:right" onclick="delPosterStep('+i+')">删步骤</button></h3>'
+      +'<div class="body"><table class="form">'
+      +'<tr><th>步骤编号</th><td><input class="ps-no" value="'+esc(s.no)+'"></td></tr>'
+      +'<tr><th>步骤标题</th><td><input class="ps-title" value="'+esc(s.title)+'"></td></tr>'
+      +'<tr><th>步骤说明</th><td><textarea class="ps-desc">'+esc(s.desc)+'</textarea></td></tr>'
+      +'</table><table class="sub-table"><thead><tr><th>分栏名称</th><th style="width:60px">图标</th><th>对象内容（每行一项）</th><th style="width:50px">操作</th></tr></thead><tbody>'+cols+'</tbody></table>'
+      +'<button class="btn-sm btn-add" onclick="addCol('+i+')">+ 增加分栏</button></div></div>';
+  }).join('');
+}
+function renderDepSteps(depsByStep){
+  document.getElementById('depSteps').innerHTML=depsByStep.map(function(list,i){
+    var rows=list.map(function(d,j){
+      var opts=TYPE_OPTS.map(function(t){return '<option value="'+t+'"'+(d.type===t?' selected':'')+'>'+t+'</option>';}).join('');
+      return '<tr><td><select class="dp-type">'+opts+'</select></td>'
+        +'<td><input class="dp-name" value="'+esc(d.name)+'"></td>'
+        +'<td><input class="dp-detail" value="'+esc(d.detail)+'"></td>'
+        +'<td style="width:80px"><input class="dp-from" value="'+esc(d.from||'')+'" placeholder="如 01"></td>'
+        +'<td style="width:90px"><input class="dp-to" value="'+esc((d.to||[]).join(','))+'" placeholder="如 02,04"></td>'
+        +'<td style="width:50px"><button class="btn-sm btn-del" onclick="delDep('+i+','+j+')">删</button></td></tr>';
+    }).join('');
+    return '<div class="step-block"><h3>步骤 '+String(i+1).padStart(2,'0')+' 的依赖项</h3><div class="body">'
+      +'<table class="sub-table"><thead><tr><th style="width:90px">依赖类型</th><th>名称</th><th>说明</th><th>来源步骤</th><th>输出给</th><th style="width:50px">操作</th></tr></thead><tbody>'+rows+'</tbody></table>'
+      +'<button class="btn-sm btn-add" onclick="addDep('+i+')">+ 增加依赖</button></div></div>';
+  }).join('');
+}
+function renderCross(list){
+  document.getElementById('crossBody').innerHTML=list.map(function(c,i){
+    return '<tr><td><input class="cr-from" value="'+esc(c.from)+'"></td>'
+      +'<td><input class="cr-to" value="'+esc(c.to)+'"></td>'
+      +'<td><input class="cr-label" value="'+esc(c.label)+'"></td>'
+      +'<td><button class="btn-sm btn-del" onclick="delCross('+i+')">删</button></td></tr>';
+  }).join('');
+}
+/* ===== 增删行 ===== */
+function addPosterStep(){
+  var steps=collectPosterSteps();
+  steps.push({no:String(steps.length+1).padStart(2,'0'),title:"新步骤",desc:"",columns:[{label:"分栏一",icon:"🔹",list:false,items:[""]}]});
+  renderPosterSteps(steps);
+}
+function delPosterStep(i){var s=collectPosterSteps();s.splice(i,1);renderPosterSteps(s);}
+function addCol(i){var s=collectPosterSteps();s[i].columns.push({label:"新分栏",icon:"🔹",list:true,items:[""]});renderPosterSteps(s);}
+function delCol(i,j){var s=collectPosterSteps();s[i].columns.splice(j,1);renderPosterSteps(s);}
+function addDep(i){var d=collectDeps();d[i].push({type:"依赖对象",name:"",detail:"",from:null,to:[]});renderDepSteps(d);}
+function delDep(i,j){var d=collectDeps();d[i].splice(j,1);renderDepSteps(d);}
+function addCross(){var c=collectCross();c.push({from:"",to:"",label:""});renderCross(c);}
+function delCross(i){var c=collectCross();c.splice(i,1);renderCross(c);}
+/* ===== 采集 ===== */
+function collectPosterSteps(){
+  return Array.prototype.map.call(document.querySelectorAll('#posterSteps .step-block'),function(bl){
+    var cols=Array.prototype.map.call(bl.querySelectorAll('.sub-table tbody tr'),function(tr){
+      var items=tr.querySelector('.ps-items').value.split('\n').map(function(x){return x.trim();}).filter(Boolean);
+      return {label:tr.querySelector('.ps-label').value,icon:tr.querySelector('.ps-icon').value,
+        list:items.length>1,items:items};
+    });
+    return {no:bl.querySelector('.ps-no').value,title:bl.querySelector('.ps-title').value,
+      desc:bl.querySelector('.ps-desc').value,columns:cols};
+  });
+}
+function collectDeps(){
+  return Array.prototype.map.call(document.querySelectorAll('#depSteps .step-block'),function(bl){
+    return Array.prototype.map.call(bl.querySelectorAll('.sub-table tbody tr'),function(tr){
+      var from=tr.querySelector('.dp-from').value.trim();
+      var to=tr.querySelector('.dp-to').value.split(',').map(function(x){return x.trim();}).filter(Boolean);
+      return {type:tr.querySelector('.dp-type').value,name:tr.querySelector('.dp-name').value,
+        detail:tr.querySelector('.dp-detail').value,from:from||null,to:to};
+    });
+  });
+}
+function collectCross(){
+  return Array.prototype.map.call(document.querySelectorAll('#crossBody tr'),function(tr){
+    return {from:tr.querySelector('.cr-from').value.trim(),to:tr.querySelector('.cr-to').value.trim(),label:tr.querySelector('.cr-label').value};
+  });
+}
+/* ===== 生成 JSON ===== */
+var RESULT={poster:null,deps:null};
+function generate(){
+  var title=document.getElementById('m-title').value.trim()||'跨境支付与沟通对接指南';
+  var subtitle=document.getElementById('m-subtitle').value.trim()||'支持国内 · 海外多场景对接 · 使用步骤';
+  var source=document.getElementById('m-source').value.trim();
+  var steps=collectPosterSteps();
+  var deps=collectDeps();
+  var cross=collectCross();
+  RESULT.poster={
+    meta:{configName:title+' - 使用步骤海报',title:title,subtitle:subtitle,theme:"business-tech",orientation:"portrait",
+      aspectRatio:"9:16",resolution:"1152x2048",language:"zh-CN",source:"内容数据由填写表格生成"},
+    style:{fontFamily:"'Microsoft YaHei UI','Microsoft YaHei','微软雅黑',sans-serif",
+      colors:{bgTop:"#123a7a",bgMid:"#071a3d",bgBottom:"#03102b",cardTop:"rgba(30,90,180,0.55)",
+        cardBottom:"rgba(10,40,100,0.65)",border:"rgba(90,180,255,0.5)",accent:"#5fd0ff",title:"#ffffff",
+        text:"#cfe2ff",subtext:"#b9d4ff",badgeTop:"#2196f3",badgeBottom:"#0d47a1",success:"#00d18f"}},
+    footerTags:[{icon:"🌐",text:"国内国外"},{icon:"🔗",text:"一键对接"},{icon:"🛡️",text:"高效合规"}],
+    steps:steps
+  };
+  RESULT.deps={
+    meta:{configName:title+' - 步骤依赖配置',title:title+' · 依赖项梳理',subtitle:subtitle,
+      source:source||'依赖关系基于使用步骤流程逻辑梳理',language:"zh-CN"},
+    links:{posterHtml:"poster.html",posterConfig:"poster-config.json",posterImage:"poster-source.jpeg",
+      online:"https://maxsyst.github.io/poster-delivery/",repo:"https://github.com/maxsyst/poster-delivery",
+      mindmap:"step-dependencies.xmind",navHtml:"dependencies.html",generator:"config-generator.html"},
+    legend:{"前置依赖":"进入本步骤前必须确定的条件或上游产出","依赖对象":"本步骤直接作用的角色、机构或对象",
+      "支撑条件":"保证本步骤成立的账户、通道、合规等条件","输出依赖":"本步骤产出，供后续步骤使用"},
+    steps:steps.map(function(s,i){return {no:s.no,title:s.title,anchor:s.anchor||('step-'+s.no),
+      summary:s.desc,deps:deps[i]||[]};}),
+    crossDependencies:cross
+  };
+  document.getElementById('out').textContent=JSON.stringify(RESULT.poster,null,2);
+  document.getElementById('status').textContent='✅ 已生成两份 JSON：'+steps.length+' 个步骤 / '+deps.reduce(function(a,b){return a+b.length;},0)+' 条依赖 / '+cross.length+' 条跨步骤关系';
+  switchTab('poster');
+}
+function switchTab(t){
+  document.getElementById('tab-poster').className=(t==='poster'?'active':'');
+  document.getElementById('tab-deps').className=(t==='deps'?'active':'');
+  if(RESULT.poster) document.getElementById('out').textContent=JSON.stringify(t==='poster'?RESULT.poster:RESULT.deps,null,2);
+}
+function copyJson(){
+  var txt=document.getElementById('out').textContent;
+  if(navigator.clipboard){navigator.clipboard.writeText(txt).then(function(){document.getElementById('status').textContent='📋 已复制到剪贴板';});}
+  else{var ta=document.createElement('textarea');ta.value=txt;document.body.appendChild(ta);ta.select();document.execCommand('copy');document.body.removeChild(ta);document.getElementById('status').textContent='📋 已复制到剪贴板';}
+}
+function downloadJson(which){
+  if(!RESULT[which]) generate();
+  var data=JSON.stringify(RESULT[which],null,2);
+  var blob=new Blob([data],{type:'application/json;charset=utf-8'});
+  var a=document.createElement('a');a.href=URL.createObjectURL(blob);
+  a.download=(which==='poster'?'poster-config.json':'dependencies-config.json');
+  document.body.appendChild(a);a.click();document.body.removeChild(a);
+  document.getElementById('status').textContent='⬇️ 已下载 '+a.download;
+}
+function resetForm(){
+  document.getElementById('m-title').value='跨境支付与沟通对接指南';
+  document.getElementById('m-subtitle').value='支持国内 · 海外多场景对接 · 使用步骤';
+  document.getElementById('m-source').value='依赖关系基于已确认的四步使用步骤流程逻辑梳理，非新增产品参数或事实';
+  renderPosterSteps(DEF_POSTER_STEPS);renderDepSteps(DEF_DEPS_BY_STEP);renderCross(DEF_CROSS);
+
+/* ===== 跨端桥接层：app.html 只依赖 window.hostBridge ===== */
+var HOST = null;
+function busLog(text){
+  var el=document.getElementById('mq-log');
+  var line='['+new Date().toLocaleTimeString()+'] '+text+'\n';
+  el.textContent=(el.textContent.replace(/^\[[^\]]*\][^\n]*\n?/,'')||'')+line;
+}
+function initBridge(){
+  var b=window.hostBridge;
+  if(!b){ document.getElementById('env-badge').textContent='无桥接'; return; }
+  b.info().then(function(i){
+    HOST=i;
+    document.getElementById('env-badge').textContent=i.label||i.platform;
+    document.getElementById('env-cap').textContent='持久化:'+(i.capabilities&&i.capabilities.persist?'✓':'✗')+
+      '  队列:'+(i.capabilities&&i.capabilities.queue?'✓':'✗')+
+      '  文件系统:'+(i.capabilities&&i.capabilities.filesystem?'✓':'✗');
+  }).catch(function(){});
+  refreshList();
+  // 订阅消息队列
+  try{ b.subscribe('poster-config',function(m){ busLog('📩 收到: '+(m&&m.name||JSON.stringify(m))); }); }catch(e){}
+}
+function refreshList(){
+  var b=window.hostBridge; if(!b) return;
+  b.list().then(function(items){
+    document.getElementById('cfg-list').innerHTML=(items||[]).map(function(it){
+      return '<li><span class="nm">'+esc(it.name||it.id)+'</span>'+
+        '<span class="meta">'+esc(it.updatedAt||'')+' · '+(it.size||0)+'B</span>'+
+        '<button onclick="storeLoad(\''+esc(it.id)+'\')">载入</button>'+
+        '<button class="danger" onclick="storeRemove(\''+esc(it.id)+'\')">删</button></li>';
+    }).join('')||'<li><span class="meta">（暂无已保存配置）</span></li>';
+  }).catch(function(e){ busLog('列表失败: '+e.message); });
+}
+function storeSave(){
+  var b=window.hostBridge; if(!b){ alert('无持久化桥接'); return; }
+  if(!RESULT.poster) generate();
+  var name=document.getElementById('cfg-name').value.trim()||('配置-'+Date.now());
+  var data=JSON.parse(JSON.stringify(RESULT.poster));
+  data.meta.configName=name;
+  b.save(name,data).then(function(r){
+    busLog('💾 已保存: '+name+' @'+(r.updatedAt||''));
+    document.getElementById('status').textContent='✅ 已保存到配置库: '+name;
+    refreshList();
+  }).catch(function(e){ busLog('保存失败: '+e.message); });
+}
+function storeLoad(id){
+  var b=window.hostBridge; if(!b) return;
+  b.load(id).then(function(cfg){
+    if(!cfg){ busLog('未找到: '+id); return; }
+    document.getElementById('cfg-name').value=id;
+    if(cfg.meta){ document.getElementById('m-title').value=cfg.meta.title||'';
+      document.getElementById('m-subtitle').value=cfg.meta.subtitle||''; }
+    if(cfg.steps) renderPosterSteps(cfg.steps);
+    document.getElementById('status').textContent='✅ 已载入配置: '+id;
+    busLog('📂 已载入: '+id);
+  }).catch(function(e){ busLog('载入失败: '+e.message); });
+}
+function storeRemove(id){
+  var b=window.hostBridge; if(!b) return;
+  b.remove(id).then(function(){ busLog('🗑️ 已删除: '+id); refreshList(); });
+}
+function storePublish(){
+  var b=window.hostBridge; if(!b) return;
+  if(!RESULT.poster) generate();
+  var msg={name:document.getElementById('cfg-name').value.trim()||'未命名配置',
+    config:RESULT.poster,at:new Date().toISOString()};
+  b.publish('poster-config',msg).then(function(r){
+    busLog('📤 发布: '+msg.name+' → '+(r.queued||r.transport||'broker')+(r.note?' ('+r.note+')':''));
+    document.getElementById('status').textContent='✅ 已发布到消息队列通道';
+  }).catch(function(e){ busLog('发布失败: '+e.message); });
+}
+initBridge();
+
+  RESULT={poster:null,deps:null};document.getElementById('out').textContent='已恢复默认值，点击「生成 JSON」预览…';
+  document.getElementById('status').textContent='↺ 已恢复默认';
+}
+renderPosterSteps(DEF_POSTER_STEPS);renderDepSteps(DEF_DEPS_BY_STEP);renderCross(DEF_CROSS);
+
+/* ===== 跨端桥接层：app.html 只依赖 window.hostBridge ===== */
+var HOST = null;
+function busLog(text){
+  var el=document.getElementById('mq-log');
+  var line='['+new Date().toLocaleTimeString()+'] '+text+'\n';
+  el.textContent=(el.textContent.replace(/^\[[^\]]*\][^\n]*\n?/,'')||'')+line;
+}
+function initBridge(){
+  var b=window.hostBridge;
+  if(!b){ document.getElementById('env-badge').textContent='无桥接'; return; }
+  b.info().then(function(i){
+    HOST=i;
+    document.getElementById('env-badge').textContent=i.label||i.platform;
+    document.getElementById('env-cap').textContent='持久化:'+(i.capabilities&&i.capabilities.persist?'✓':'✗')+
+      '  队列:'+(i.capabilities&&i.capabilities.queue?'✓':'✗')+
+      '  文件系统:'+(i.capabilities&&i.capabilities.filesystem?'✓':'✗');
+  }).catch(function(){});
+  refreshList();
+  // 订阅消息队列
+  try{ b.subscribe('poster-config',function(m){ busLog('📩 收到: '+(m&&m.name||JSON.stringify(m))); }); }catch(e){}
+}
+function refreshList(){
+  var b=window.hostBridge; if(!b) return;
+  b.list().then(function(items){
+    document.getElementById('cfg-list').innerHTML=(items||[]).map(function(it){
+      return '<li><span class="nm">'+esc(it.name||it.id)+'</span>'+
+        '<span class="meta">'+esc(it.updatedAt||'')+' · '+(it.size||0)+'B</span>'+
+        '<button onclick="storeLoad(\''+esc(it.id)+'\')">载入</button>'+
+        '<button class="danger" onclick="storeRemove(\''+esc(it.id)+'\')">删</button></li>';
+    }).join('')||'<li><span class="meta">（暂无已保存配置）</span></li>';
+  }).catch(function(e){ busLog('列表失败: '+e.message); });
+}
+function storeSave(){
+  var b=window.hostBridge; if(!b){ alert('无持久化桥接'); return; }
+  if(!RESULT.poster) generate();
+  var name=document.getElementById('cfg-name').value.trim()||('配置-'+Date.now());
+  var data=JSON.parse(JSON.stringify(RESULT.poster));
+  data.meta.configName=name;
+  b.save(name,data).then(function(r){
+    busLog('💾 已保存: '+name+' @'+(r.updatedAt||''));
+    document.getElementById('status').textContent='✅ 已保存到配置库: '+name;
+    refreshList();
+  }).catch(function(e){ busLog('保存失败: '+e.message); });
+}
+function storeLoad(id){
+  var b=window.hostBridge; if(!b) return;
+  b.load(id).then(function(cfg){
+    if(!cfg){ busLog('未找到: '+id); return; }
+    document.getElementById('cfg-name').value=id;
+    if(cfg.meta){ document.getElementById('m-title').value=cfg.meta.title||'';
+      document.getElementById('m-subtitle').value=cfg.meta.subtitle||''; }
+    if(cfg.steps) renderPosterSteps(cfg.steps);
+    document.getElementById('status').textContent='✅ 已载入配置: '+id;
+    busLog('📂 已载入: '+id);
+  }).catch(function(e){ busLog('载入失败: '+e.message); });
+}
+function storeRemove(id){
+  var b=window.hostBridge; if(!b) return;
+  b.remove(id).then(function(){ busLog('🗑️ 已删除: '+id); refreshList(); });
+}
+function storePublish(){
+  var b=window.hostBridge; if(!b) return;
+  if(!RESULT.poster) generate();
+  var msg={name:document.getElementById('cfg-name').value.trim()||'未命名配置',
+    config:RESULT.poster,at:new Date().toISOString()};
+  b.publish('poster-config',msg).then(function(r){
+    busLog('📤 发布: '+msg.name+' → '+(r.queued||r.transport||'broker')+(r.note?' ('+r.note+')':''));
+    document.getElementById('status').textContent='✅ 已发布到消息队列通道';
+  }).catch(function(e){ busLog('发布失败: '+e.message); });
+}
+initBridge();
+
+</script>
+</body>
+</html>
