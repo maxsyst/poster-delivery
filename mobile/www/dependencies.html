@@ -1,0 +1,242 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>四步对接流程 · 依赖项导航</title>
+<style>
+  :root{
+    --font:'Microsoft YaHei UI','Microsoft YaHei','微软雅黑',sans-serif;
+    --bg:#0a1020; --panel:#0f1b36; --panel2:#12244a;
+    --border:rgba(95,208,255,.35); --accent:#5fd0ff; --accent2:#4a8cff;
+    --title:#fff; --text:#d5e6ff; --sub:#9dbbe6;
+    --pre:#ffb454; --obj:#5fd0ff; --sup:#9b8cff; --out:#38d6a0;
+  }
+  *{box-sizing:border-box;margin:0;padding:0}
+  body{font-family:var(--font);background:var(--bg);color:var(--text);line-height:1.6;-webkit-font-smoothing:antialiased}
+  .wrap{max-width:1180px;margin:0 auto;padding:28px 20px 70px}
+
+  header{text-align:center;padding:18px 0 26px}
+  header h1{font-size:32px;font-weight:900;color:var(--title);letter-spacing:1px;text-shadow:0 0 22px rgba(95,208,255,.45)}
+  header p{color:var(--sub);font-size:14px;margin-top:8px}
+  .src-note{display:inline-block;margin-top:12px;font-size:12px;color:#8fb0dd;background:rgba(30,80,160,.25);border:1px solid var(--border);padding:6px 16px;border-radius:20px}
+
+  /* 链接导航条 —— 全部来自配置 links */
+  .linkbar{display:flex;flex-wrap:wrap;gap:10px;justify-content:center;margin:6px 0 30px}
+  .linkbar a{display:inline-flex;align-items:center;gap:7px;text-decoration:none;color:#eaf4ff;font-size:13px;font-weight:700;
+    padding:9px 16px;border-radius:22px;background:linear-gradient(180deg,rgba(40,120,230,.5),rgba(12,50,120,.6));
+    border:1px solid var(--border);box-shadow:0 0 14px rgba(50,140,240,.25);transition:.2s}
+  .linkbar a:hover{transform:translateY(-2px);box-shadow:0 0 22px rgba(95,208,255,.55);border-color:var(--accent)}
+  .linkbar a .ic{font-size:15px}
+
+  /* 依赖类型图例 —— 来自配置 legend */
+  .legend{display:flex;flex-wrap:wrap;gap:16px;justify-content:center;margin-bottom:28px}
+  .legend span{font-size:12px;color:var(--sub);display:inline-flex;align-items:center;gap:6px}
+  .dot{width:10px;height:10px;border-radius:50%;display:inline-block}
+  .dot.pre{background:var(--pre)} .dot.obj{background:var(--obj)} .dot.sup{background:var(--sup)} .dot.out{background:var(--out)}
+
+  /* 跨步骤依赖链 */
+  .chain{background:linear-gradient(135deg,var(--panel2),var(--panel));border:1px solid var(--border);border-radius:16px;
+    padding:18px 20px;margin-bottom:30px;box-shadow:inset 0 0 30px rgba(20,70,150,.3)}
+  .chain h2{font-size:17px;color:var(--accent);margin-bottom:14px;letter-spacing:1px}
+  .chain-row{display:flex;flex-wrap:wrap;gap:8px;align-items:center}
+  .chain-item{display:inline-flex;align-items:center;gap:8px;background:rgba(8,30,70,.7);border:1px solid rgba(95,208,255,.3);
+    border-radius:10px;padding:8px 12px;font-size:12.5px;color:var(--text)}
+  .chain-item b{color:var(--accent);font-size:13px}
+  .chain-arrow{color:var(--accent2);font-weight:800}
+
+  /* 步骤网格（思维导图式：中心 → 四步 → 依赖分组） */
+  .mindmap-title{text-align:center;font-size:18px;color:var(--sub);margin-bottom:6px;letter-spacing:2px}
+  .grid{display:grid;grid-template-columns:repeat(2,1fr);gap:18px}
+  .step{background:linear-gradient(135deg,var(--panel2),var(--panel));border:1px solid var(--border);border-radius:16px;
+    padding:18px;box-shadow:0 8px 26px rgba(8,40,100,.35);scroll-margin-top:20px;transition:.25s}
+  .step:hover{border-color:var(--accent);box-shadow:0 0 30px rgba(95,208,255,.35)}
+  .step.flash{animation:flash 1.4s ease}
+  @keyframes flash{0%,100%{box-shadow:0 8px 26px rgba(8,40,100,.35)}30%{box-shadow:0 0 40px rgba(95,208,255,.85);border-color:#fff}}
+  .step-head{display:flex;align-items:center;gap:12px;border-bottom:1px solid rgba(95,208,255,.2);padding-bottom:12px;margin-bottom:12px}
+  .no{flex:none;width:44px;height:44px;border-radius:50%;display:flex;align-items:center;justify-content:center;
+    font-size:21px;font-weight:900;font-style:italic;color:#fff;background:linear-gradient(145deg,var(--accent2),#0d47a1);
+    border:1px solid rgba(180,220,255,.7);box-shadow:0 0 14px rgba(70,160,255,.6)}
+  .step-title{font-size:21px;font-weight:900;color:var(--title)}
+  .step-summary{font-size:12.5px;color:var(--sub);margin-bottom:14px}
+  .dep-group{margin-bottom:11px}
+  .dep-type{font-size:12px;font-weight:800;letter-spacing:1px;margin-bottom:6px;display:inline-flex;align-items:center;gap:7px}
+  .dep-type.pre{color:var(--pre)} .dep-type.obj{color:var(--obj)} .dep-type.sup{color:var(--sup)} .dep-type.out{color:var(--out)}
+  .dep-list{list-style:none}
+  .dep-list li{position:relative;padding:7px 12px 7px 26px;margin-bottom:5px;font-size:12.5px;color:var(--text);
+    background:rgba(6,22,58,.6);border:1px solid rgba(95,208,255,.18);border-radius:8px}
+  .dep-list li::before{content:"";position:absolute;left:10px;top:14px;width:7px;height:7px;border-radius:50%;background:currentColor}
+  .dep-list li.pre{color:var(--pre)} .dep-list li.obj{color:var(--obj)} .dep-list li.sup{color:var(--sup)} .dep-list li.out{color:var(--out)}
+  .dep-list li .name{font-weight:800;color:#eaf4ff}
+  .dep-list li .detail{display:block;color:var(--sub);font-size:11.5px;margin-top:2px;font-weight:400}
+  .jump{display:inline-block;margin-top:4px;font-size:11.5px;color:var(--accent);text-decoration:none;border-bottom:1px dashed var(--accent)}
+  .jump:hover{color:#fff}
+
+  footer{text-align:center;color:#6f8fbf;font-size:12px;margin-top:40px}
+  @media(max-width:760px){.grid{grid-template-columns:1fr}header h1{font-size:25px}}
+</style>
+</head>
+<body>
+<div class="wrap">
+  <header>
+    <h1 id="h-title">四步对接流程 · 依赖项梳理</h1>
+    <p id="h-subtitle"></p>
+    <div class="src-note" id="src-note"></div>
+  </header>
+
+  <nav class="linkbar" id="linkbar"></nav>
+  <div class="legend" id="legend"></div>
+
+  <section class="chain">
+    <h2>跨步骤依赖链</h2>
+    <div class="chain-row" id="chain"></div>
+  </section>
+
+  <div class="mindmap-title">中心主题 · 四个步骤及其依赖项（点击可跳转对应步骤）</div>
+  <main class="grid" id="grid"></main>
+
+  <footer>依赖项为依据四步使用步骤流程逻辑梳理，用于查阅导航；非新增产品参数或认证事实。</footer>
+</div>
+
+<script type="application/json" id="inline-config">
+{
+  "meta": {
+    "title": "四步对接流程 · 依赖项梳理",
+    "subtitle": "思维导图 + 配置化跳转导航",
+    "source": "依赖关系基于已确认的四步使用步骤流程逻辑梳理，非新增产品参数或事实"
+  },
+  "links": {
+    "posterHtml": "poster.html",
+    "posterConfig": "poster-config.json",
+    "posterImage": "poster-source.jpeg",
+    "online": "https://maxsyst.github.io/poster-delivery/",
+    "repo": "https://github.com/maxsyst/poster-delivery",
+    "mindmap": "step-dependencies.xmind"
+  },
+  "legend": {
+    "前置依赖": "进入本步骤前必须确定的条件或上游产出",
+    "依赖对象": "本步骤直接作用的角色、机构或对象",
+    "支撑条件": "保证本步骤成立的账户、通道、合规等条件",
+    "输出依赖": "本步骤产出，供后续步骤使用"
+  },
+  "steps": [
+    {"no":"01","title":"场景选择","anchor":"step-01","summary":"根据业务需求确定国内或海外对接场景，明确支付与沟通的适用范围。","deps":[
+      {"type":"前置依赖","name":"业务需求确认","detail":"明确业务类型与结算方向","from":null},
+      {"type":"支撑条件","name":"场景判定依据","detail":"交易发生地、收付款方所在地、币种","from":null},
+      {"type":"依赖对象","name":"国内场景 / 海外场景","detail":"二选一，决定后续支付与沟通对象范围","from":null},
+      {"type":"输出依赖","name":"场景类型","detail":"输出给步骤02、03，决定国内或海外对象清单","to":["02","03"]}]},
+    {"no":"02","title":"支付对接","anchor":"step-02","summary":"对合适的支付对象建立安全、稳定、合规的跨境支付通道。","deps":[
+      {"type":"前置依赖","name":"步骤01 场景类型","detail":"场景决定选用国内或海外支付对象清单","from":"01"},
+      {"type":"依赖对象","name":"国内支付对象","detail":"银行 / 第三方支付 / 企业财务","from":null},
+      {"type":"依赖对象","name":"海外支付对象","detail":"国际支付机构 / 本地支付 / 海外合作方","from":null},
+      {"type":"支撑条件","name":"账户资质与支付通道","detail":"账户可用、通道合规、币种支持","from":null},
+      {"type":"输出依赖","name":"支付结果与凭证","detail":"作为步骤04对账确认的依据","to":["04"]}]},
+    {"no":"03","title":"沟通对接","anchor":"step-03","summary":"建立国内与海外高效沟通机制，确保支付信息、业务需求与进度实时同步。","deps":[
+      {"type":"前置依赖","name":"步骤01 场景类型","detail":"场景决定选用国内或海外沟通对象","from":"01"},
+      {"type":"前置依赖","name":"步骤02 对接进度","detail":"支付对象确定后同步对应沟通人","from":"02"},
+      {"type":"依赖对象","name":"国内沟通对象","detail":"项目负责人 / 财务与支付专员 / 业务对接人员","from":null},
+      {"type":"依赖对象","name":"海外沟通对象","detail":"项目负责人 / 当地合作机构代表 / 项目协调人员","from":null},
+      {"type":"支撑条件","name":"双向沟通机制","detail":"支付信息、业务需求、进度实时同步","from":null},
+      {"type":"输出依赖","name":"沟通记录与确认","detail":"作为步骤04流程闭环的依据","to":["04"]}]},
+    {"no":"04","title":"完成验证","anchor":"step-04","summary":"验证支付结果与业务流程，确保数据一致、合规可追溯、形成闭环。","deps":[
+      {"type":"前置依赖","name":"步骤02 支付结果","detail":"对账确认的金额、币种、收付款依据","from":"02"},
+      {"type":"前置依赖","name":"步骤03 沟通记录","detail":"确认沟通落地，支撑流程闭环","from":"03"},
+      {"type":"依赖对象","name":"订单 / 合同","detail":"核对支付金额、币种、收付款信息一致性","from":null},
+      {"type":"支撑条件","name":"国内外法规与合规要求","detail":"检查支付流程、资金来源与业务背景","from":null},
+      {"type":"输出依赖","name":"可追溯业务闭环","detail":"归档凭证与记录，形成完整闭环","to":[]}]}
+  ],
+  "crossDependencies": [
+    {"from":"01","to":"02","label":"场景决定支付对象"},
+    {"from":"01","to":"03","label":"场景决定沟通对象"},
+    {"from":"02","to":"03","label":"支付对象确定对应沟通人"},
+    {"from":"02","to":"04","label":"支付结果用于对账"},
+    {"from":"03","to":"04","label":"沟通记录用于闭环"}
+  ]
+}
+</script>
+
+<script>
+var TYPE_KEY={'前置依赖':'pre','依赖对象':'obj','支撑条件':'sup','输出依赖':'out'};
+function esc(s){return String(s).replace(/[&<>"]/g,function(c){return {'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;'}[c];});}
+
+function applyConfig(cfg){
+  var m=cfg.meta||{}, links=cfg.links||{};
+  document.getElementById('h-title').textContent=m.title||'';
+  document.getElementById('h-subtitle').textContent=m.subtitle||'';
+  document.getElementById('src-note').textContent='数据来源：'+(m.source||'');
+
+  // 链接导航条（配置化）
+  var LINK_ITEMS=[
+    {k:'posterHtml',ic:'🖼️',t:'海报展示页'},
+    {k:'posterConfig',ic:'⚙️',t:'海报配置 JSON'},
+    {k:'dependenciesConfig',ic:'🧩',t:'依赖配置 JSON'},
+    {k:'posterImage',ic:'📷',t:'海报成品图'},
+    {k:'mindmap',ic:'🧠',t:'思维导图 xmind'},
+    {k:'generator',ic:'📝',t:'内容填写 / JSON生成'},
+    {k:'online',ic:'🌐',t:'线上站点'},
+    {k:'repo',ic:'📦',t:'GitHub 仓库'}
+  ];
+  var defaults={dependenciesConfig:'dependencies-config.json',generator:'config-generator.html'};
+  document.getElementById('linkbar').innerHTML=LINK_ITEMS.map(function(it){
+    var url=links[it.k]||defaults[it.k]||'#';
+    return '<a href="'+esc(url)+'" target="_blank"><span class="ic">'+it.ic+'</span>'+it.t+'</a>';
+  }).join('');
+
+  // 图例
+  var lg=cfg.legend||{};
+  document.getElementById('legend').innerHTML=Object.keys(lg).map(function(k){
+    return '<span><i class="dot '+(TYPE_KEY[k]||'obj')+'"></i>'+esc(k)+'：'+esc(lg[k])+'</span>';
+  }).join('');
+
+  // 跨步骤依赖链（点击跳转）
+  document.getElementById('chain').innerHTML=(cfg.crossDependencies||[]).map(function(c){
+    return '<span class="chain-item"><b>'+esc(c.from)+'</b><span class="chain-arrow">→</span><b>'+esc(c.to)+'</b>'+esc(c.label)+'</span>';
+  }).join('');
+
+  // 步骤卡片
+  document.getElementById('grid').innerHTML=(cfg.steps||[]).map(function(s){
+    var groups={};
+    (s.deps||[]).forEach(function(d){(groups[d.type]=groups[d.type]||[]).push(d);});
+    var html='<section class="step" id="'+esc(s.anchor)+'">';
+    html+='<div class="step-head"><span class="no">'+esc(s.no)+'</span><span class="step-title">'+esc(s.title)+'</span></div>';
+    html+='<p class="step-summary">'+esc(s.summary)+'</p>';
+    Object.keys(groups).forEach(function(t){
+      var key=TYPE_KEY[t]||'obj';
+      html+='<div class="dep-group"><div class="dep-type '+key+'"><i class="dot '+key+'"></i>'+esc(t)+'</div><ul class="dep-list">';
+      groups[t].forEach(function(d){
+        var nm=esc(d.name);
+        if(d.from) nm='<span class="jump" data-to="'+esc(d.from)+'">[来自步骤'+esc(d.from)+']</span> '+nm;
+        if(d.to&&d.to.length) nm+=' <span class="jump" data-to="'+esc(d.to[0])+'">→ 步骤'+esc(d.to.join(','))+'</span>';
+        html+='<li class="'+key+'"><span class="name">'+nm+'</span><span class="detail">'+esc(d.detail)+'</span></li>';
+      });
+      html+='</ul></div>';
+    });
+    html+='</section>';
+    return html;
+  }).join('');
+
+  // 步骤间跳转
+  document.querySelectorAll('.jump[data-to]').forEach(function(el){
+    el.style.cursor='pointer';
+    el.addEventListener('click',function(){
+      var no=this.getAttribute('data-to');
+      var target=document.querySelector('.step[id="step-'+no+'"]');
+      if(target){target.scrollIntoView({behavior:'smooth',block:'center'});target.classList.remove('flash');void target.offsetWidth;target.classList.add('flash');}
+    });
+  });
+}
+
+(async function(){
+  var cfg;
+  try{
+    var r=await fetch('./dependencies-config.json',{cache:'no-store'});
+    if(!r.ok) throw new Error('fetch failed');
+    cfg=await r.json();
+  }catch(e){
+    cfg=JSON.parse(document.getElementById('inline-config').textContent);
+  }
+  applyConfig(cfg);
+})();
+</script>
+</body>
+</html>
