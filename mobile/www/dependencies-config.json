@@ -1,0 +1,86 @@
+{
+  "meta": {
+    "configName": "跨境支付与沟通对接 - 步骤依赖配置",
+    "title": "四步对接流程 · 依赖项梳理",
+    "subtitle": "思维导图 + 配置化跳转导航",
+    "source": "依赖关系基于已确认的四步使用步骤流程逻辑梳理，非新增产品参数或事实",
+    "language": "zh-CN"
+  },
+  "links": {
+    "posterHtml": "poster.html",
+    "posterConfig": "poster-config.json",
+    "posterImage": "poster-source.jpeg",
+    "online": "https://maxsyst.github.io/poster-delivery/",
+    "repo": "https://github.com/maxsyst/poster-delivery",
+    "mindmap": "step-dependencies.xmind",
+    "navHtml": "dependencies.html",
+    "generator": "config-generator.html"
+  },
+  "legend": {
+    "前置依赖": "进入本步骤前必须确定的条件或上游产出",
+    "依赖对象": "本步骤直接作用的角色、机构或对象",
+    "支撑条件": "保证本步骤成立的账户、通道、合规等条件",
+    "输出依赖": "本步骤产出，供后续步骤使用"
+  },
+  "steps": [
+    {
+      "no": "01",
+      "title": "场景选择",
+      "anchor": "step-01",
+      "summary": "根据业务需求确定国内或海外对接场景，明确支付与沟通的适用范围。",
+      "deps": [
+        { "type": "前置依赖", "name": "业务需求确认", "detail": "明确业务类型与结算方向", "from": null },
+        { "type": "支撑条件", "name": "场景判定依据", "detail": "交易发生地、收付款方所在地、币种", "from": null },
+        { "type": "依赖对象", "name": "国内场景 / 海外场景", "detail": "二选一，决定后续支付与沟通对象范围", "from": null },
+        { "type": "输出依赖", "name": "场景类型", "detail": "输出给步骤02、03，决定国内或海外对象清单", "to": ["02", "03"] }
+      ]
+    },
+    {
+      "no": "02",
+      "title": "支付对接",
+      "anchor": "step-02",
+      "summary": "对合适的支付对象建立安全、稳定、合规的跨境支付通道。",
+      "deps": [
+        { "type": "前置依赖", "name": "步骤01 场景类型", "detail": "场景决定选用国内或海外支付对象清单", "from": "01" },
+        { "type": "依赖对象", "name": "国内支付对象", "detail": "银行 / 第三方支付 / 企业财务", "from": null },
+        { "type": "依赖对象", "name": "海外支付对象", "detail": "国际支付机构 / 本地支付 / 海外合作方", "from": null },
+        { "type": "支撑条件", "name": "账户资质与支付通道", "detail": "账户可用、通道合规、币种支持", "from": null },
+        { "type": "输出依赖", "name": "支付结果与凭证", "detail": "作为步骤04对账确认的依据", "to": ["04"] }
+      ]
+    },
+    {
+      "no": "03",
+      "title": "沟通对接",
+      "anchor": "step-03",
+      "summary": "建立国内与海外高效沟通机制，确保支付信息、业务需求与进度实时同步。",
+      "deps": [
+        { "type": "前置依赖", "name": "步骤01 场景类型", "detail": "场景决定选用国内或海外沟通对象", "from": "01" },
+        { "type": "前置依赖", "name": "步骤02 对接进度", "detail": "支付对象确定后同步对应沟通人", "from": "02" },
+        { "type": "依赖对象", "name": "国内沟通对象", "detail": "项目负责人 / 财务与支付专员 / 业务对接人员", "from": null },
+        { "type": "依赖对象", "name": "海外沟通对象", "detail": "项目负责人 / 当地合作机构代表 / 项目协调人员", "from": null },
+        { "type": "支撑条件", "name": "双向沟通机制", "detail": "支付信息、业务需求、进度实时同步", "from": null },
+        { "type": "输出依赖", "name": "沟通记录与确认", "detail": "作为步骤04流程闭环的依据", "to": ["04"] }
+      ]
+    },
+    {
+      "no": "04",
+      "title": "完成验证",
+      "anchor": "step-04",
+      "summary": "验证支付结果与业务流程，确保数据一致、合规可追溯、形成闭环。",
+      "deps": [
+        { "type": "前置依赖", "name": "步骤02 支付结果", "detail": "对账确认的金额、币种、收付款依据", "from": "02" },
+        { "type": "前置依赖", "name": "步骤03 沟通记录", "detail": "确认沟通落地，支撑流程闭环", "from": "03" },
+        { "type": "依赖对象", "name": "订单 / 合同", "detail": "核对支付金额、币种、收付款信息一致性", "from": null },
+        { "type": "支撑条件", "name": "国内外法规与合规要求", "detail": "检查支付流程、资金来源与业务背景", "from": null },
+        { "type": "输出依赖", "name": "可追溯业务闭环", "detail": "归档凭证与记录，形成完整闭环", "to": [] }
+      ]
+    }
+  ],
+  "crossDependencies": [
+    { "from": "01", "to": "02", "label": "场景决定支付对象" },
+    { "from": "01", "to": "03", "label": "场景决定沟通对象" },
+    { "from": "02", "to": "03", "label": "支付对象确定对应沟通人" },
+    { "from": "02", "to": "04", "label": "支付结果用于对账" },
+    { "from": "03", "to": "04", "label": "沟通记录用于闭环" }
+  ]
+}
